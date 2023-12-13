@@ -34,7 +34,13 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 func PostUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	var err error
+	var result models.User
 	json.NewDecoder(r.Body).Decode(&user)
+	if err := database.DB.Where("email = ?", user.Email).First(&result).Error; err == nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("El correo electrónico ya está registrado"))
+		return
+	}
 
 	user = security.HashedPassword(user)
 
