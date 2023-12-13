@@ -35,10 +35,11 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 
 func PostProduct(w http.ResponseWriter, r *http.Request) {
 	var product models.Product
+	var err error
 	json.NewDecoder(r.Body).Decode(&product)
 
 	createdProduct := database.DB.Create(&product)
-	err := createdProduct.Error
+	err = createdProduct.Error
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))

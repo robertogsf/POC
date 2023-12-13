@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -71,15 +70,27 @@ func GenerateAccessToken(u models.User) string {
 }
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requiresAuthorization := checkIfAuthorizationIsRequired(r.URL.Path)
+		/*requiresAuthorization := checkIfAuthorizationIsRequired(r.URL.Path)
 
 		if !requiresAuthorization {
 			next.ServeHTTP(w, r)
 			return
+		}*/
+		// Lista de endpoints que no requieren autenticación
+		paths := []string{"/login", "/register"}
+
+		// Comprueba si la ruta actual está en la lista de paths
+		for _, path := range paths {
+			if r.URL.Path == path {
+				next.ServeHTTP(w, r)
+				return
+			}
 		}
+
 		tokenString := r.Header.Get("Authorization")
-		tokenString = tokenString[1:]
+		/*tokenString = tokenString[1:]
 		tokenString = strings.TrimSuffix(tokenString, string(tokenString[len(tokenString)-1]))
+		*/
 		if tokenString == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("Missing access token"))
@@ -105,6 +116,7 @@ func Authenticate(next http.Handler) http.Handler {
 	})
 }
 
+/*
 func checkIfAuthorizationIsRequired(path string) bool {
 	if path == "/users/login" {
 		return false
@@ -113,3 +125,4 @@ func checkIfAuthorizationIsRequired(path string) bool {
 	}
 	return true
 }
+*/
